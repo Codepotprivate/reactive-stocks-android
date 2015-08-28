@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/stock_symbol"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_alignParentLeft="true"
+        android:text="GOOG"/>
+    <TextView
+        android:id="@+id/stock_price"
+        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="0.00"/>
+</RelativeLayout>
