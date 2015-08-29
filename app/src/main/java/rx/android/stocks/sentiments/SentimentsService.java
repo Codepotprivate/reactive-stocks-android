@@ -55,16 +55,16 @@ public class SentimentsService extends Service {
 
 
     public Observable<Sentiment> get(String symbol) {
-        return fetchTweets(symbol)
-                .flatMap(this::fetchSentiment)
-                .flatMap(this::averageSentiment);
+        // Flatmap Tweets to fetch sentiment and average it
+        return Observable.empty();
     }
 
     private Observable<List<Sentiment>> fetchSentiment(List<String> tweets) {
         Log.d(TAG, "Fetching sentiment with list of tweets");
-        Observable<Sentiment> sentimentObservable =
-                Observable.from(tweets)
-                        .flatMap(text -> textSentimentService.fetchSentiment(text));
+        // TODO: Flatmap list of tweets to sentiment observable.
+        Observable<Sentiment> sentimentObservable = Observable.empty();
+
+        // Collect List of sentiments. Use collect
         return sentimentObservable.<List<Sentiment>>collect(
                 LinkedList<Sentiment>::new,
                 (r, sentiment) -> r.add(sentiment)
@@ -73,9 +73,8 @@ public class SentimentsService extends Service {
 
     private Observable<List<String>> fetchTweets(String symbol) {
         Log.d(TAG, "Fetching tweets for symbol");
-        return twitterService.getTweets(symbol).map(response -> response.findPath("statuses"))
-                .map(status -> status.findValue("text").asText())
-                .collect(() -> new LinkedList<String>(), (strings, s) -> strings.add(s));
+        // TODO: Fetch tweets. map response to statuses and to text
+        return Observable.empty();
     }
 
     private Observable<Sentiment> averageSentiment(List<Sentiment> sentiments) {
@@ -84,38 +83,26 @@ public class SentimentsService extends Service {
         Observable<Double> neutral = collectNeutralAverage(sentiments);
         Observable<Double> pos = collectPositiveAverage(sentiments);
 
-        return neutral.zipWith(
-                neg, (neutralProb, negProb) -> {
-                    SentimentProbability res = new SentimentProbability();
-                    res.setNeutral(neutralProb);
-                    res.setNeg(negProb);
-                    return res;
-                })
-                .zipWith(pos, (sentimentProbability, posProb) -> {
-                    sentimentProbability.setPos(posProb);
-                    return sentimentProbability;
-                })
-                .map(SentimentsService::decideSentiment);
+
+        // TODO: Zip observables to construct SentimentProbability object.
+        return Observable.empty();
     }
 
     private Observable<Double> collectNegativeAverage(List<Sentiment> sentiments) {
-        Observable<Double> negativeSentiments = Observable.from(sentiments)
-                .filter(sentiment1 -> sentiment1.getLabel().equals("neg"))
-                .map(sentiment1 -> sentiment1.getProbability().getNeg());
+        // TODO: Filter negative sentiments and map to negative.
+        Observable<Double> negativeSentiments = Observable.empty();
         return averageDouble(negativeSentiments);
     }
 
     private Observable<Double> collectNeutralAverage(List<Sentiment> sentiments) {
-        Observable<Double> negativeSentiments = Observable.from(sentiments)
-                .filter(sentiment1 -> sentiment1.getLabel().equals("neutral"))
-                .map(sentiment1 -> sentiment1.getProbability().getNeutral());
+        // TODO: By analogy
+        Observable<Double> negativeSentiments = Observable.empty();
         return averageDouble(negativeSentiments);
     }
 
     private Observable<Double> collectPositiveAverage(List<Sentiment> sentiments) {
-        Observable<Double> negativeSentiments = Observable.from(sentiments)
-                .filter(sentiment1 -> sentiment1.getLabel().equals("pos"))
-                .map(sentiment1 -> sentiment1.getProbability().getPos());
+        // Todo: By analogy
+        Observable<Double> negativeSentiments = Observable.empty();
         return averageDouble(negativeSentiments);
     }
 

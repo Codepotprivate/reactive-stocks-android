@@ -84,10 +84,6 @@ public class MainActivity extends AppCompatActivity implements StocksService.Get
                 initStocks();
                 listView.setAdapter(adapter);
                 handler.postDelayed(refreshStocks, REFRESH_RATE);
-                MainActivity.this.service.getStocks()
-                        .sample(5, TimeUnit.SECONDS)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(MainActivity.this::onStockReady);
             }
 
             @Override
@@ -104,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements StocksService.Get
                 Log.d(TAG, "SentimentService connected");
                 SentimentsService.Binder binder = (SentimentsService.Binder) service;
                 SentimentsService sentimentsService = binder.getService();
-
             }
 
             @Override
@@ -120,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements StocksService.Get
         if (null == service) return;
 
         for(String symbol : initialStocks) {
-            service.watchStock(symbol);
+            service.getStock(symbol, this);
         }
     }
 
@@ -128,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements StocksService.Get
     protected void onStop() {
         super.onStop();
         handler.removeCallbacks(refreshStocks);
-        Observable.just("test").subscribe(string -> Toast.makeText(this, string, Toast.LENGTH_LONG).show(   ));
     }
 
     @Override

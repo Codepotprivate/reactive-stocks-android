@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 
 import rx.Observable;
 import rx.android.stocks.model.Stock;
@@ -46,31 +47,30 @@ public class StocksService extends Service {
     }
 
     public void getStock(String symbol, GetStockRequester callback) {
-        Stock stock = getLastStockQuote(symbol);
-        FakeStockQuote fakeStockQuote = new FakeStockQuote();
-        if (null == stock) {
-            stock = Stock.create(symbol, fakeStockQuote.price());
-        }
+        Stock stock = getOrCreateStock(symbol);
         AsyncTask<GetStockRequest, Void, GetStockResult> getStockDataTask = new GetStockDataTask();
         GetStockRequest request = new GetStockRequest(stock, callback);
         getStockDataTask.execute(request);
     }
 
     public void watchStock(String symbol) {
+        Stock stock = getOrCreateStock(symbol);
+        putStock(stock);
+    }
+
+    @NonNull
+    private Stock getOrCreateStock(String symbol) {
         Stock stock = getLastStockQuote(symbol);
         if (null == stock) {
             FakeStockQuote fakeStockQuote = new FakeStockQuote();
             stock = Stock.create(symbol, fakeStockQuote.price());
         }
-        stocks.put(stock.getSymbol(), stock);
+        return stock;
     }
 
     public Observable<Stock> getStocks() {
-
-        // TODO: create observable returning
-        return Observable.interval(0, 500, TimeUnit.MILLISECONDS)
-                .flatMap(aLong -> Observable.from(stocks.values()))
-                .flatMap(stock -> getStockObservable(stock)).subscribeOn(Schedulers.computation());
+        // TODO: create observable returning observable with generated stock updates
+        return Observable.empty();
     }
 
 
