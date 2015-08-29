@@ -8,9 +8,11 @@ import android.os.IBinder;
 import rx.Observable;
 import rx.android.stocks.model.Stock;
 import rx.android.stocks.util.FakeStockQuote;
+import rx.schedulers.Schedulers;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class StocksService extends Service {
     private final HashMap<String, Stock> stocks = new LinkedHashMap<>();
@@ -54,11 +56,23 @@ public class StocksService extends Service {
         getStockDataTask.execute(request);
     }
 
-    public Observable<Stock> getStock(String symbol) {
-        // TODO: create observable returning
-
-        return Observable.empty();
+    public void watchStock(String symbol) {
+        Stock stock = getLastStockQuote(symbol);
+        if (null == stock) {
+            FakeStockQuote fakeStockQuote = new FakeStockQuote();
+            stock = Stock.create(symbol, fakeStockQuote.price());
+        }
+        stocks.put(stock.getSymbol(), stock);
     }
+
+    public Observable<Stock> getStocks() {
+
+        // TODO: create observable returning
+        return Observable.interval(0, 500, TimeUnit.MILLISECONDS)
+                .flatMap(aLong -> Observable.from(stocks.values()))
+                .flatMap(stock -> getStockObservable(stock)).subscribeOn(Schedulers.computation());
+    }
+
 
     private class GetStockDataTask extends AsyncTask<GetStockRequest, Void, GetStockResult> {
 

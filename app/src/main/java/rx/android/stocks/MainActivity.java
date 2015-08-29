@@ -15,11 +15,14 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.android.stocks.model.Stock;
 import rx.android.stocks.sentiments.SentimentsService;
 import rx.android.stocks.service.StocksService;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements StocksService.GetStockRequester {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -81,6 +84,10 @@ public class MainActivity extends AppCompatActivity implements StocksService.Get
                 initStocks();
                 listView.setAdapter(adapter);
                 handler.postDelayed(refreshStocks, REFRESH_RATE);
+                MainActivity.this.service.getStocks()
+                        .sample(5, TimeUnit.SECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(MainActivity.this::onStockReady);
             }
 
             @Override
@@ -113,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements StocksService.Get
         if (null == service) return;
 
         for(String symbol : initialStocks) {
-            service.getStock(symbol, this);
+            service.watchStock(symbol);
         }
     }
 
@@ -121,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements StocksService.Get
     protected void onStop() {
         super.onStop();
         handler.removeCallbacks(refreshStocks);
-        Observable.just("test").subscribe(string -> Toast.makeText(this, string, Toast.LENGTH_LONG).show());
+        Observable.just("test").subscribe(string -> Toast.makeText(this, string, Toast.LENGTH_LONG).show(   ));
     }
 
     @Override

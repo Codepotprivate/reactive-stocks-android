@@ -73,7 +73,7 @@ public class SentimentsService extends Service {
 
     private Observable<List<String>> fetchTweets(String symbol) {
         Log.d(TAG, "Fetching tweets for symbol");
-        return twitterService.getTweets(symbol).doOnNext(jsonNode -> Log.d(TAG, "Got Tweets")).map(response -> response.findPath("statuses"))
+        return twitterService.getTweets(symbol).map(response -> response.findPath("statuses"))
                 .map(status -> status.findValue("text").asText())
                 .collect(() -> new LinkedList<String>(), (strings, s) -> strings.add(s));
     }
